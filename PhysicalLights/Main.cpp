@@ -1,1 +1,8 @@
-#include <NuiApi.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+int main(){
+	cout << "Sup" << endl;
+}
