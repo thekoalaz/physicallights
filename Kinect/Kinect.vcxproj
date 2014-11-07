@@ -11,9 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A2023C97-3A3C-46E8-9104-FA7B492E189F}</ProjectGuid>
-    <RootNamespace>PhysicalLights</RootNamespace>
-    <ProjectName>Kinect</ProjectName>
+    <ProjectGuid>{8718D135-A617-4A1D-B628-0BBC98E25463}</ProjectGuid>
+    <RootNamespace>Kinect</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
