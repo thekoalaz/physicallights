@@ -1,23 +1,23 @@
 #include <iostream>
-#include <maya/MString.h>
 #include <maya/MArgList.h>
 #include <maya/MFnPlugin.h>
 #include <maya/MPxCommand.h>
-#include <maya/MIOStream.h>
-class hello : public MPxCommand
+#include "PhysicalLightServer.h"
+
+class startServer : public MPxCommand
 {
 public:
 	MStatus doIt(const MArgList& args);
 	static void* creator();
 };
 
-MStatus hello::doIt(const MArgList& args) {
+MStatus startServer::doIt(const MArgList& args) {
 	cout << "Hello " << args.asString(0).asChar() << endl;
 	return MS::kSuccess;
 }
 
-void* hello::creator() {
-	return new hello;
+void* startServer::creator() {
+	return new startServer;
 }
 
 MStatus initializePlugin(MObject obj) {
@@ -31,4 +31,3 @@ MStatus uninitializePlugin(MObject obj) {
 	plugin.deregisterCommand("hello");
 	return MS::kSuccess;
 }
-

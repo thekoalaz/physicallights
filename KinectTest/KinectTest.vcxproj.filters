@@ -14,23 +14,4 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="PhysicalLightServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PhysicalLightController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="PhysicalLightServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PhysicalLightController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>
