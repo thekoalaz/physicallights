@@ -22,7 +22,7 @@ void* startServer::creator() {
 
 MStatus initializePlugin(MObject obj) {
 	MFnPlugin plugin(obj, "Kevin Lim", "1.0", "Any");
-	plugin.registerCommand("hello", hello::creator);
+	plugin.registerCommand("startServer", startServer::creator);
 	return MS::kSuccess;
 }
 

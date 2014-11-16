@@ -26,10 +26,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PhysicalLightServer.h">
+    <ClInclude Include="PhysicalLightController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PhysicalLightController.h">
+    <ClInclude Include="PhysicalLightServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
