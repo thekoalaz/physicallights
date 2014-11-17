@@ -1,0 +1,14 @@
+import maya.cmds as cmds
+
+LIGHTS_NAMESPACE = "lights"
+
+class PhysicalLightController(object):
+    def __init__(self):
+        print("Initializing controller.") 
+        self.lights[0] = LIGHTS_NAMESPACE + "aiAreaLight_key"
+        self.lights[1] = LIGHTS_NAMESPACE + "aiAreaLight_fill"
+
+    def translateLight(id, x, y, z):
+        print("Translating", self.lights[0], "to", (x, y, z))
+
+    def tester():
