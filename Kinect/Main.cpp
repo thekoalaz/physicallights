@@ -33,7 +33,7 @@ void tester(PhysicalLightClient * client)
 			}
 			angle += angle_increment;
 			circle(x, z, radius, angle);
-			client->translate(id, x, 80, z);
+			client->translate(id, x, 180, z);
 		}
 		id = (id == 0) ? 1 : 0;
 		Sleep(50);
