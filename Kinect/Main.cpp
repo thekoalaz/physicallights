@@ -1,11 +1,15 @@
+#include "stdafx.h"
+#include "resource.h"
+
 #include <iostream>
 #include <string>
-#include <Windows.h>
-#include "PhysicalLightClient.h"
 
 #include <cmath>
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+#include "PhysicalLightClient.h"
+#include "PhysicalLightKinect.h"
 
 void circle(double & x, double & z, const double radius, const double angle)
 {
@@ -42,11 +46,27 @@ void tester(PhysicalLightClient * client)
 }
 using namespace std;
 
-int main(){
+/// <summary>
+/// Entry point for the application
+/// </summary>
+/// <param name="hInstance">handle to the application instance</param>
+/// <param name="hPrevInstance">always 0</param>
+/// <param name="lpCmdLine">command line arguments</param>
+/// <param name="nCmdShow">whether to display minimized, maximized, or normally</param>
+/// <returns>status</returns>
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
+{
 	PhysicalLightClient * client = PhysicalLightClient::Instance();
-	// Testing
-	tester(client);
-	cout << "Press any key to exit";
-	std::getchar();
+    CInfraredBasics application;
+    application.Run(hInstance, nCmdShow);
 }
 
+
+//int main(){
+//
+//	PhysicalLightClient * client = PhysicalLightClient::Instance();
+//	// Testing
+//	tester(client);
+//	cout << "Press any key to exit";
+//	std::getchar();
+//}
