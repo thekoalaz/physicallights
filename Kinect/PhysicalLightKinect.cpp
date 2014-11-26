@@ -5,7 +5,12 @@
 //------------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include <iostream>
+#include <string>
+#include <cstringt.h>
+#include <atlstr.h>
 #include <strsafe.h>
+
 #include "PhysicalLightKinect.h"
 #include "resource.h"
 
@@ -199,6 +204,30 @@ LRESULT CALLBACK CInfraredBasics::DlgProc(HWND hWnd, UINT message, WPARAM wParam
         }
         break;
 
+		case WM_COMMAND:
+		{
+			switch (HIWORD(wParam))
+			{
+				case BN_CLICKED:
+				{
+					switch (LOWORD(wParam))
+					{
+						case IDC_BUTTON_Calibrate:
+							Calibrate();
+							break;
+						case IDC_BUTTON_START:
+							Start();
+							break;
+						case IDC_BUTTON_STOP:
+							Stop();
+							break;
+					}
+				}
+				break;
+			}
+		}
+		break;
+
         // If the titlebar X is clicked, destroy app
         case WM_CLOSE:
             DestroyWindow(hWnd);
@@ -370,4 +399,20 @@ void CInfraredBasics::ProcessColor()
 void CInfraredBasics::SetStatusMessage(WCHAR * szMessage)
 {
     SendDlgItemMessageW(m_hWnd, IDC_STATUS, WM_SETTEXT, 0, (LPARAM)szMessage);
+}
+
+void CInfraredBasics::Calibrate()
+{
+	SetStatusMessage(L"Calibrate");
+	system("matlab -r hello() -logfile hello.log -nosplash -nodesktop -minimize");
+}
+
+void CInfraredBasics::Start()
+{
+	SetStatusMessage(L"Start");
+}
+
+void CInfraredBasics::Stop()
+{
+	SetStatusMessage(L"Stop");
 }

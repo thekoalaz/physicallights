@@ -73,7 +73,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="PhysicalLightClient.rc" />
+    <ResourceCompile Include="PhysicalLightKinect.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />

@@ -59,14 +59,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	PhysicalLightClient * client = PhysicalLightClient::Instance();
     CInfraredBasics application;
     application.Run(hInstance, nCmdShow);
+	// Testing Maya
+	//tester(client);
+	cout << "Press any key to exit";
+	std::getchar();
 }
-
-
-//int main(){
-//
-//	PhysicalLightClient * client = PhysicalLightClient::Instance();
-//	// Testing
-//	tester(client);
-//	cout << "Press any key to exit";
-//	std::getchar();
-//}

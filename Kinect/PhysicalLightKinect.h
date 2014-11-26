@@ -91,4 +91,10 @@ private:
     /// </summary>
     /// <param name="szMessage">message to display</param>
     void                    SetStatusMessage(WCHAR* szMessage);
+
+	void					Calibrate();
+
+	void					Start();
+
+	void					Stop();
 };
