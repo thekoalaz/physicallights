@@ -61,6 +61,6 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     application.Run(hInstance, nCmdShow);
 	// Testing Maya
 	//tester(client);
-	cout << "Press any key to exit";
+	//cout << "Press any key to exit";
 	std::getchar();
 }

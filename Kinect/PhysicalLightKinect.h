@@ -10,6 +10,8 @@
 #include "NuiApi.h"
 #include "ImageRenderer.h"
 
+#include <vector>
+
 class CInfraredBasics
 {
     static const int        cColorWidth  = 640;
@@ -70,6 +72,9 @@ private:
 
     RGBQUAD*                m_pTempColorBuffer;
 
+	std::vector<double>		light1Calibration;
+	std::vector<double>		light2Calibration;
+
     /// <summary>
     /// Main processing function
     /// </summary>
@@ -90,9 +95,11 @@ private:
     /// Set the status bar message
     /// </summary>
     /// <param name="szMessage">message to display</param>
-    void                    SetStatusMessage(WCHAR* szMessage);
+    void                    SetStatusMessage(const WCHAR* szMessage);
 
 	void					Calibrate();
+	void					Parse_Calibrate();
+	void					Parse_Line(std::string line, std::vector<double> & calibrate);
 
 	void					Start();
 

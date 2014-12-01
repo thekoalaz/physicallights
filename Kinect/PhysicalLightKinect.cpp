@@ -6,6 +6,8 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <cstringt.h>
 #include <atlstr.h>
@@ -396,7 +398,7 @@ void CInfraredBasics::ProcessColor()
 /// Set the status bar message
 /// </summary>
 /// <param name="szMessage">message to display</param>
-void CInfraredBasics::SetStatusMessage(WCHAR * szMessage)
+void CInfraredBasics::SetStatusMessage(const WCHAR * szMessage)
 {
     SendDlgItemMessageW(m_hWnd, IDC_STATUS, WM_SETTEXT, 0, (LPARAM)szMessage);
 }
@@ -405,7 +407,62 @@ void CInfraredBasics::Calibrate()
 {
 	SetStatusMessage(L"Calibrate");
 	system("matlab -r hello() -logfile hello.log -nosplash -nodesktop -minimize");
+	Parse_Calibrate();
+
+	/* Test Code */
+	std::ostringstream result;
+	result << "(";
+	for (auto value : light1Calibration)
+	{
+		result << " " << value;
+	}
+	result << ") ";
+	
+	result << "( ";
+	for (auto value : light2Calibration)
+	{
+		result << " " << value;
+	}
+	result << ") ";
+
+	std::string result_str = result.str();
+	std::wstring w_result = std::wstring(result_str.begin(), result_str.end()).c_str();
+	SetStatusMessage(w_result.c_str());
+
 }
+
+void CInfraredBasics::Parse_Calibrate()
+{
+	std::string fileName = "calibrate.txt";
+	std::ifstream fin(fileName);
+    if( !fin  ) {
+        std::cerr << "Can't open file " << fileName << std::endl;
+        std::exit( -1 );
+    }
+
+
+    // initialize the vector from the values in the file:
+    std::vector<double> lines{ std::istream_iterator<double>(fin),
+                               std::istream_iterator<double>() };
+
+	int divide = 3;
+	int index = 0;
+	for (auto &line : lines)
+	{
+		if (index < divide)
+		{
+			light1Calibration.push_back(line);
+			index++;
+		}
+		else
+		{
+			light2Calibration.push_back(line);
+		}
+	}
+
+    fin.close();
+}
+
 
 void CInfraredBasics::Start()
 {
