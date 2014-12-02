@@ -13,6 +13,8 @@
 #include <atlstr.h>
 #include <strsafe.h>
 
+#include <opencv2/opencv.hpp>
+
 #include "PhysicalLightKinect.h"
 #include "resource.h"
 
@@ -25,7 +27,10 @@ CInfraredBasics::CInfraredBasics() :
     m_hNextColorFrameEvent(INVALID_HANDLE_VALUE),
     m_pColorStreamHandle(INVALID_HANDLE_VALUE),
     m_pNuiSensor(NULL),
-    m_pTempColorBuffer(NULL)
+    m_hNextDepthFrameEvent(INVALID_HANDLE_VALUE),
+    m_pDepthStreamHandle(INVALID_HANDLE_VALUE),
+    m_pTempColorBuffer(NULL),
+    m_bSaveScreenshot(false)
 {
 }
 
@@ -42,6 +47,11 @@ CInfraredBasics::~CInfraredBasics()
     if (m_hNextColorFrameEvent != INVALID_HANDLE_VALUE)
     {
         CloseHandle(m_hNextColorFrameEvent);
+    }
+
+    if (m_hNextDepthFrameEvent != INVALID_HANDLE_VALUE)
+    {
+        CloseHandle(m_hNextDepthFrameEvent);
     }
 
     // clean up Direct2D renderer
@@ -206,29 +216,32 @@ LRESULT CALLBACK CInfraredBasics::DlgProc(HWND hWnd, UINT message, WPARAM wParam
         }
         break;
 
-		case WM_COMMAND:
-		{
-			switch (HIWORD(wParam))
-			{
-				case BN_CLICKED:
-				{
-					switch (LOWORD(wParam))
-					{
-						case IDC_BUTTON_Calibrate:
-							Calibrate();
-							break;
-						case IDC_BUTTON_START:
-							Start();
-							break;
-						case IDC_BUTTON_STOP:
-							Stop();
-							break;
-					}
-				}
-				break;
-			}
-		}
-		break;
+        case WM_COMMAND:
+        {
+            switch (HIWORD(wParam))
+            {
+                case BN_CLICKED:
+                {
+                    switch (LOWORD(wParam))
+                    {
+                        case IDC_BUTTON_Screenshot:
+                            m_bSaveScreenshot = true;
+                            break;
+                        case IDC_BUTTON_Calibrate:
+                            Calibrate();
+                            break;
+                        case IDC_BUTTON_START:
+                            Start();
+                            break;
+                        case IDC_BUTTON_STOP:
+                            Stop();
+                            break;
+                    }
+                }
+                break;
+            }
+        }
+        break;
 
         // If the titlebar X is clicked, destroy app
         case WM_CLOSE:
@@ -285,7 +298,8 @@ HRESULT CInfraredBasics::CreateFirstConnected()
     if (NULL != m_pNuiSensor)
     {
         // Initialize the Kinect and specify that we'll be using color
-        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR); 
+        //hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR); 
+        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX|NUI_INITIALIZE_FLAG_USES_COLOR); 
         if (SUCCEEDED(hr))
         {
             // Create an event that will be signaled when color data is available
@@ -299,6 +313,25 @@ HRESULT CInfraredBasics::CreateFirstConnected()
                 2,
                 m_hNextColorFrameEvent,
                 &m_pColorStreamHandle);
+            if (NULL == m_pNuiSensor || FAILED(hr))
+            {
+                SetStatusMessage(L"Could not open infrared stream");
+                return E_FAIL;
+            }
+
+            m_hNextDepthFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+            hr = m_pNuiSensor->NuiImageStreamOpen(
+                NUI_IMAGE_TYPE_DEPTH_AND_PLAYER_INDEX,
+                NUI_IMAGE_RESOLUTION_640x480,
+                0,
+                2,
+                m_hNextDepthFrameEvent,
+                &m_pDepthStreamHandle);
+            if( NULL == m_pNuiSensor || FAILED( hr ) )
+            {
+                SetStatusMessage(L"Could not open depth stream");
+                return E_FAIL;
+            }
         }
     }
 
@@ -323,23 +356,85 @@ HRESULT CInfraredBasics::CreateFirstConnected()
 /// <returns>
 /// S_OK on success, otherwise failure code.
 /// </returns>
-HRESULT GetScreenshotFileName(wchar_t *screenshotName, UINT screenshotNameSize)
+HRESULT GetScreenshotFileName(wchar_t *screenshotName, wchar_t *streamName, UINT screenshotNameSize)
 {
     wchar_t *knownPath = NULL;
     HRESULT hr = SHGetKnownFolderPath(FOLDERID_Pictures, 0, NULL, &knownPath);
 
     if (SUCCEEDED(hr))
     {
-        // Get the time
-        wchar_t timeString[MAX_PATH];
-        GetTimeFormatEx(NULL, 0, NULL, L"hh'-'mm'-'ss", timeString, _countof(timeString));
-
-        // File name will be KinectSnapshot-HH-MM-SS.wav
-        StringCchPrintfW(screenshotName, screenshotNameSize, L"%s\\KinectSnapshot-%s.bmp", knownPath, timeString);
+        // File name will be CalibrateInfrared.bmp
+        StringCchPrintfW(screenshotName, screenshotNameSize, L".\\Calibrate%s.bmp", streamName);
     }
 
     CoTaskMemFree(knownPath);
     return hr;
+}
+
+/// <summary>
+/// Save passed in image data to disk as a bitmap
+/// </summary>
+/// <param name="pBitmapBits">image data to save</param>
+/// <param name="lWidth">width (in pixels) of input image data</param>
+/// <param name="lHeight">height (in pixels) of input image data</param>
+/// <param name="wBitsPerPixel">bits per pixel of image data</param>
+/// <param name="lpszFilePath">full file path to output bitmap to</param>
+/// <returns>indicates success or failure</returns>
+HRESULT CInfraredBasics::SaveBitmapToFile(BYTE* pBitmapBits, LONG lWidth, LONG lHeight, WORD wBitsPerPixel, LPCWSTR lpszFilePath)
+{
+    DWORD dwByteCount = lWidth * lHeight * (wBitsPerPixel / 8);
+
+    BITMAPINFOHEADER bmpInfoHeader = {0};
+
+    bmpInfoHeader.biSize        = sizeof(BITMAPINFOHEADER);  // Size of the header
+    bmpInfoHeader.biBitCount    = wBitsPerPixel;             // Bit count
+    bmpInfoHeader.biCompression = BI_RGB;                    // Standard RGB, no compression
+    bmpInfoHeader.biWidth       = lWidth;                    // Width in pixels
+    bmpInfoHeader.biHeight      = -lHeight;                  // Height in pixels, negative indicates it's stored right-side-up
+    bmpInfoHeader.biPlanes      = 1;                         // Default
+    bmpInfoHeader.biSizeImage   = dwByteCount;               // Image size in bytes
+
+    BITMAPFILEHEADER bfh = {0};
+
+    bfh.bfType    = 0x4D42;                                           // 'M''B', indicates bitmap
+    bfh.bfOffBits = bmpInfoHeader.biSize + sizeof(BITMAPFILEHEADER);  // Offset to the start of pixel data
+    bfh.bfSize    = bfh.bfOffBits + bmpInfoHeader.biSizeImage;        // Size of image + headers
+
+    // Create the file on disk to write to
+    HANDLE hFile = CreateFileW(lpszFilePath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    // Return if error opening file
+    if (NULL == hFile) 
+    {
+        return E_ACCESSDENIED;
+    }
+
+    DWORD dwBytesWritten = 0;
+    
+    // Write the bitmap file header
+    if ( !WriteFile(hFile, &bfh, sizeof(bfh), &dwBytesWritten, NULL) )
+    {
+        CloseHandle(hFile);
+        return E_FAIL;
+    }
+    
+    // Write the bitmap info header
+    if ( !WriteFile(hFile, &bmpInfoHeader, sizeof(bmpInfoHeader), &dwBytesWritten, NULL) )
+    {
+        CloseHandle(hFile);
+        return E_FAIL;
+    }
+    
+    // Write the RGB Data
+    if ( !WriteFile(hFile, pBitmapBits, bmpInfoHeader.biSizeImage, &dwBytesWritten, NULL) )
+    {
+        CloseHandle(hFile);
+        return E_FAIL;
+    }    
+
+    // Close the file
+    CloseHandle(hFile);
+    return S_OK;
 }
 
 /// <summary>
@@ -351,7 +446,7 @@ void CInfraredBasics::ProcessColor()
     HRESULT hr;
     NUI_IMAGE_FRAME imageFrame;
 
-    // Attempt to get the color frame
+    // Attempt to get the infrared frame
     hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pColorStreamHandle, 0, &imageFrame);
     if (FAILED(hr))
     {
@@ -385,6 +480,51 @@ void CInfraredBasics::ProcessColor()
 
         // Draw the data with Direct2D
         m_pDrawColor->Draw(reinterpret_cast<BYTE*>(m_pTempColorBuffer), cColorWidth * cColorHeight * sizeof(RGBQUAD));
+
+        // If the user pressed the screenshot button, save a screenshot
+        if (m_bSaveScreenshot)
+        {
+            WCHAR statusMessage[cStatusMessageMaxLen];
+
+            // Retrieve the path to My Photos
+            WCHAR screenshotPath[MAX_PATH];
+            GetScreenshotFileName(screenshotPath, L"Infrared", _countof(screenshotPath));
+
+            std::vector<int> compression_params;
+            compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+            compression_params.push_back(9);
+
+            const NUI_IMAGE_FRAME * pImageFrame = NULL;
+            HRESULT hr = NuiImageStreamGetNextFrame( m_hNextDepthFrameEvent, 0, &pImageFrame );
+            INuiFrameTexture * pTexture = pImageFrame->pFrameTexture;
+            NUI_LOCKED_RECT LockedRect;
+            pTexture->LockRect( 0, &LockedRect, NULL, 0 );
+
+            cv::Mat depth = cvCreateImageHeader(cvSize(cColorWidth,cColorHeight),IPL_DEPTH_8U, 3);
+            cvSetData(&depth,static_cast<BYTE *>(LockedRect.pBits),cColorWidth*3);
+            //cv::Mat img(cColorHeight, cColorWidth, CV_8UC4, static_cast<BYTE *>(LockedRect.pBits));
+            cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+            cv::imshow( "Display window", depth );                   // Show our image inside it.
+            //cvSetData(img, static_cast<BYTE *>(LockedRect.pBits), img->widthStep);
+            cv::imwrite("Calibrate_Infrared.png", depth, compression_params);
+            //// Write out the bitmap to disk
+            //hr = SaveBitmapToFile(static_cast<BYTE *>(LockedRect.pBits), cColorWidth, cColorHeight, 32, screenshotPath);
+
+            //if (SUCCEEDED(hr))
+            //{
+            //    // Set the status bar to show where the screenshot was saved
+            //    StringCchPrintf( statusMessage, cStatusMessageMaxLen, L"Screenshot saved to %s", screenshotPath);
+            //}
+            //else
+            //{
+            //    StringCchPrintf( statusMessage, cStatusMessageMaxLen, L"Failed to write screenshot to %s", screenshotPath);
+            //}
+
+            //SetStatusMessage(statusMessage);
+
+            // toggle off so we don't save a screenshot again next frame
+            m_bSaveScreenshot = false;
+        }
     }
 
     // We're done with the texture so unlock it
@@ -405,36 +545,37 @@ void CInfraredBasics::SetStatusMessage(const WCHAR * szMessage)
 
 void CInfraredBasics::Calibrate()
 {
-	SetStatusMessage(L"Calibrate");
-	system("matlab -r hello() -logfile hello.log -nosplash -nodesktop -minimize");
-	Parse_Calibrate();
+    SetStatusMessage(L"Calibrate");
+    system("matlab -r calibrate('', '') -logfile calibrate.log -nosplash -nodesktop -minimize");
+    Sleep(2000);
+    Parse_Calibrate();
 
-	/* Test Code */
-	std::ostringstream result;
-	result << "(";
-	for (auto value : light1Calibration)
-	{
-		result << " " << value;
-	}
-	result << ") ";
-	
-	result << "( ";
-	for (auto value : light2Calibration)
-	{
-		result << " " << value;
-	}
-	result << ") ";
+    /* Test Result */
+    std::ostringstream result;
+    result << "(";
+    for (auto value : light1Calibration)
+    {
+        result << " " << value;
+    }
+    result << ") ";
+    
+    result << "( ";
+    for (auto value : light2Calibration)
+    {
+        result << " " << value;
+    }
+    result << ") ";
 
-	std::string result_str = result.str();
-	std::wstring w_result = std::wstring(result_str.begin(), result_str.end()).c_str();
-	SetStatusMessage(w_result.c_str());
+    std::string result_str = result.str();
+    std::wstring w_result = std::wstring(result_str.begin(), result_str.end()).c_str();
+    SetStatusMessage(w_result.c_str());
 
 }
 
 void CInfraredBasics::Parse_Calibrate()
 {
-	std::string fileName = "calibrate.txt";
-	std::ifstream fin(fileName);
+    std::string fileName = "calibrate.txt";
+    std::ifstream fin(fileName);
     if( !fin  ) {
         std::cerr << "Can't open file " << fileName << std::endl;
         std::exit( -1 );
@@ -445,20 +586,20 @@ void CInfraredBasics::Parse_Calibrate()
     std::vector<double> lines{ std::istream_iterator<double>(fin),
                                std::istream_iterator<double>() };
 
-	int divide = 3;
-	int index = 0;
-	for (auto &line : lines)
-	{
-		if (index < divide)
-		{
-			light1Calibration.push_back(line);
-			index++;
-		}
-		else
-		{
-			light2Calibration.push_back(line);
-		}
-	}
+    int divide = 3;
+    int index = 0;
+    for (auto &line : lines)
+    {
+        if (index < divide)
+        {
+            light1Calibration.push_back(line);
+            index++;
+        }
+        else
+        {
+            light2Calibration.push_back(line);
+        }
+    }
 
     fin.close();
 }
@@ -466,10 +607,11 @@ void CInfraredBasics::Parse_Calibrate()
 
 void CInfraredBasics::Start()
 {
-	SetStatusMessage(L"Start");
+    SetStatusMessage(L"Start");
 }
 
 void CInfraredBasics::Stop()
 {
-	SetStatusMessage(L"Stop");
+    SetStatusMessage(L"Stop");
 }
+

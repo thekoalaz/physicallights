@@ -60,6 +60,8 @@ public:
 private:
     HWND                    m_hWnd;
 
+    bool                    m_bSaveScreenshot;
+
     // Current Kinect
     INuiSensor*             m_pNuiSensor;
 
@@ -70,10 +72,13 @@ private:
     HANDLE                  m_pColorStreamHandle;
     HANDLE                  m_hNextColorFrameEvent;
 
+    HANDLE                  m_pDepthStreamHandle;
+    HANDLE                  m_hNextDepthFrameEvent;
+
     RGBQUAD*                m_pTempColorBuffer;
 
-	std::vector<double>		light1Calibration;
-	std::vector<double>		light2Calibration;
+    std::vector<double>     light1Calibration;
+    std::vector<double>     light2Calibration;
 
     /// <summary>
     /// Main processing function
@@ -97,11 +102,12 @@ private:
     /// <param name="szMessage">message to display</param>
     void                    SetStatusMessage(const WCHAR* szMessage);
 
-	void					Calibrate();
-	void					Parse_Calibrate();
-	void					Parse_Line(std::string line, std::vector<double> & calibrate);
+    void                    Calibrate();
+    HRESULT                    SaveBitmapToFile(BYTE* pBitmapBits, LONG lWidth, LONG lHeight, WORD wBitsPerPixel, LPCWSTR lpszFilePath);
+    void                    Parse_Calibrate();
+    void                    Parse_Line(std::string line, std::vector<double> & calibrate);
 
-	void					Start();
+    void                    Start();
 
-	void					Stop();
+    void                    Stop();
 };
