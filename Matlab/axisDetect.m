@@ -15,6 +15,7 @@ I = medfilt2(I);
 optm_angle = 0;
 template = imrotate(template, optm_angle);
 c = conv2(double(I), template);
+c = removeModel(c);
 c = nonMaxSupr(c);
 figure, imagesc(c);
 
