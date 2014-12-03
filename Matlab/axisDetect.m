@@ -9,6 +9,9 @@ I = I_ir(ss(1,2) : ss(2,2), ss(1,1) : ss(2,1));
 
 %get rid of noise (S&P)
 I = medfilt2(I);
+% I = bwmorph(I, 'open');
+figure, imagesc(I);
+% I = bwmorph(I, '
 
 optm = optimalAxis(I, template);
 template = imrotate(template, optm);

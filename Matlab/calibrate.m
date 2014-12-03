@@ -1,9 +1,9 @@
 function calibrate()
 [im, im_depth] = kinectframe();
+figure
+imshow(im)
 
-%get search space window and write to .mat file
-figure, imshow(im);
-search_space = ginput(2); close;
+search_space = ginput(2);
 search_space = floor(search_space);
 save('data\search_space.mat', 'search_space');
 
