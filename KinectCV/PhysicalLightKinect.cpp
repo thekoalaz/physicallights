@@ -88,9 +88,10 @@ int PhysicalLightKinect::Run()
     //    return hr;
     //}
 
+    cv::namedWindow("Command Window", CV_WINDOW_AUTOSIZE);
     while (1)
     {
-        Update();
+        //Update();
         //exit
         int c = cvWaitKey(1);
         if (c == 27 || c == 'q' || c == 'Q')
@@ -109,21 +110,27 @@ int PhysicalLightKinect::Run()
             client->translate(PhysicalLightClient::FILL_LIGHT, light2Calibration[0], light2Calibration[1], light2Calibration[2]);
             if (m_firstCalibration)
             {
+                client->set_center(
+                    (light1Calibration[0] + light2Calibration[0]) / 2,
+                    (light1Calibration[1] + light2Calibration[1]) / 2,
+                    (light1Calibration[2] + light2Calibration[2]) / 2);
                 client->translate(PhysicalLightClient::CHAR,
-                    light1Calibration[0] + light2Calibration[0] / 2,
-                    light1Calibration[1] + light2Calibration[1] / 2+750,
-                    light1Calibration[2] + light2Calibration[2] / 2);
+                    (light1Calibration[0] + light2Calibration[0]) / 2,
+                    (light1Calibration[1] + light2Calibration[1]) / 2 + 600,
+                    (light1Calibration[2] + light2Calibration[2]) / 2);
                 client->translate(PhysicalLightClient::GROUND,
-                    light1Calibration[0] + light2Calibration[0] / 2,
-                    light1Calibration[1] + light2Calibration[1] / 2,
-                    light1Calibration[2] + light2Calibration[2] / 2);
+                    (light1Calibration[0] + light2Calibration[0]) / 2,
+                    (light1Calibration[1] + light2Calibration[1]) / 2-170,
+                    (light1Calibration[2] + light2Calibration[2]) / 2);
                 client->translate(PhysicalLightClient::CAMERA,
-                    light1Calibration[0] + light2Calibration[0] / 2-500,
-                    light1Calibration[1] + light2Calibration[1] / 2+300,
-                    light1Calibration[2] + light2Calibration[2] / 2+200);
+                    (light1Calibration[0] + light2Calibration[0]) / 2-250,
+                    (light1Calibration[1] + light2Calibration[1]) / 2,
+                    (light1Calibration[2] + light2Calibration[2]) / 2+100);
 
                 m_firstCalibration = false;
             }
+            client->AimAtCenter(PhysicalLightClient::KEY_LIGHT);
+            client->AimAtCenter(PhysicalLightClient::FILL_LIGHT);
         }
     }
 
@@ -258,11 +265,11 @@ void PhysicalLightKinect::Calibrate()
     std::cout << "Calibrate";
     if (m_firstCalibration)
     {
-        system("matlab -r calibrate_first('', '') -logfile calibrate.log -nosplash -nodesktop");
+        system("matlab -r calibrate('', '') -logfile calibrate.log -nosplash -nodesktop");
     }
     else
     {
-        system("matlab -r calibrate('', '') -logfile calibrate.log -nosplash -nodesktop -minimize");
+        system("matlab -r updateCoordinates('', '') -logfile calibrate.log -nosplash -nodesktop -minimize");
     }
     Sleep(2000);
     Parse_Calibrate();

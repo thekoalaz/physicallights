@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include <map>
 #pragma once
 
@@ -7,6 +8,8 @@ public:
 	static PhysicalLightClient* Instance();
 	void translate(const int id, const double x, const double y, const double z);
 	void rotate(const int id, const double x, const double y, const double z);
+    void set_center(const double x, const double y, const double z);
+    void AimAtCenter(const int id);
 
 private:
 	PhysicalLightClient();
@@ -26,6 +29,8 @@ private:
 	int connection;
 	bool verbose = false;
 	bool connected = false;
+
+    std::vector<double> center;
 
 	static PhysicalLightClient* instance;
 	std::string	server_name = "mayaCommand";

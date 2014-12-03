@@ -51,10 +51,10 @@ const int PhysicalLightClient::CHAR = 4;
 PhysicalLightClient::LightMap PhysicalLightClient::createLightMap()
 {
 	LightMap lights;
-	lights[0] = lights_namespace + "::aiAreaLight_key";
-	lights[1] = lights_namespace + "::aiAreaLight_fill";
-	lights[2] = lights_namespace + "::ground";
-	lights[3] = lights_namespace + "::shot_cam";
+	lights[0] = lights_namespace + "aiAreaLight_key";
+	lights[1] = lights_namespace + "aiAreaLight_fill";
+	lights[2] = lights_namespace + "ground";
+	lights[3] = lights_namespace + "shot_cam";
 	lights[4] = "kevin";
 
 	return lights;
@@ -82,6 +82,19 @@ void PhysicalLightClient::translate(const int id, const double x, const double y
 
 	return;
 }
+
+void PhysicalLightClient::set_center(const double x, const double y, const double z)
+{
+    center.push_back(x);
+    center.push_back(y);
+    center.push_back(z);
+}
+
+void PhysicalLightClient::AimAtCenter(int id)
+{
+
+}
+
 
 void PhysicalLightClient::rotate(const int id, const double x, const double y, const double z)
 {
