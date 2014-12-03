@@ -2,7 +2,7 @@ function updateCoordinates()
 
 [im, im_depth] = kinectframe();
 
-load('search_space.mat');
+load('data\search_space.mat');
 centroids = axisDetect(im, search_space);
 %append z
 centroids(1,3) = im_depth(round(centroids(1,2)), round(centroids(1,1)));

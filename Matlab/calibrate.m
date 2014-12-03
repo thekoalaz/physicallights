@@ -5,7 +5,7 @@ function calibrate()
 figure, imshow(im);
 search_space = ginput(2); close;
 search_space = floor(search_space);
-save('search_space.mat', 'search_space');
+save('data\search_space.mat', 'search_space');
 
 centroids = axisDetect(im, search_space);
 %append z
