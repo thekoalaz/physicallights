@@ -14,7 +14,8 @@ PhysicalLightKinect::PhysicalLightKinect() :
     m_pDepthStreamHandle(INVALID_HANDLE_VALUE),
     m_pTempColorBuffer(NULL),
     m_bSaveInfrared(false),
-    m_bSaveDepth(false)
+    m_bSaveDepth(false),
+    client(PhysicalLightClient::Instance())
 {
 }
 
@@ -84,7 +85,7 @@ int PhysicalLightKinect::Run()
     }
 
 
-    while(1)
+    while (1)
     {
         Update();
         //exit
@@ -92,8 +93,14 @@ int PhysicalLightKinect::Run()
         if (c == 27 || c == 'q' || c == 'Q')
             break;
         if (c == 's')
+        {
             m_bSaveInfrared = true;
             m_bSaveDepth = true;
+        }
+        if (c == 'c')
+        {
+            Calibrate();
+        }
     }
 
     if (NULL == m_pNuiSensor || FAILED(hr))
@@ -186,8 +193,51 @@ int PhysicalLightKinect::drawDepth()
     pTexture->LockRect( 0, &LockedRect, NULL, 0 );
     if( LockedRect.Pitch != 0 )
     {
-        BYTE * pBuffer = static_cast<BYTE*>(LockedRect.pBits);
-        cvSetData(depth,pBuffer,LockedRect.Pitch);
+        BYTE buf[ImageWidth*ImageHeight*3];
+        USHORT * pBuff = (USHORT*) LockedRect.pBits;
+        const int CHANNEL = 3;
+        for(int i=0;i<ImageWidth*ImageHeight;i++)
+        {
+            BYTE index = pBuff[i]&0x07;
+            USHORT realDepth = (pBuff[i]&0xFFF8)>>3;
+            BYTE scale = 255 - (BYTE)(256*realDepth/0x0fff);
+            buf[CHANNEL*i] = buf[CHANNEL*i+1] = buf[CHANNEL*i+2] = 0;
+            switch( index )
+            {
+            case 0:
+                buf[CHANNEL*i]=scale/2;
+                buf[CHANNEL*i+1]=scale/2;
+                buf[CHANNEL*i+2]=scale/2;
+                break;
+            case 1:
+                buf[CHANNEL*i]=scale;
+                break;
+            case 2:
+                buf[CHANNEL*i+1]=scale;
+                break;
+            case 3:
+                buf[CHANNEL*i+2]=scale;
+                break;
+            case 4:
+                buf[CHANNEL*i]=scale;
+                buf[CHANNEL*i+1]=scale;
+                break;
+            case 5:
+                buf[CHANNEL*i]=scale;
+                buf[CHANNEL*i+2]=scale;
+                break;
+            case 6:
+                buf[CHANNEL*i+1]=scale;
+                buf[CHANNEL*i+2]=scale;
+                break;
+            case 7:
+                buf[CHANNEL*i]=255-scale/2;
+                buf[CHANNEL*i+1]=255-scale/2;
+                buf[CHANNEL*i+2]=255-scale/2;
+                break;
+            }
+        }
+        cvSetData(depth,buf,ImageWidth*3);
     }
     cvShowImage("Depth", depth);
     if (m_bSaveDepth)
@@ -255,6 +305,8 @@ void PhysicalLightKinect::Parse_Calibrate()
     }
 
     fin.close();
+
+    client->translate
 }
 
 

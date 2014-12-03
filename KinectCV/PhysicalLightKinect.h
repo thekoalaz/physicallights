@@ -14,6 +14,8 @@
 
 #include <vector>
 
+#include "PhysicalLightClient.h"
+
 class PhysicalLightKinect
 {
     static const int        ImageWidth  = 640;
@@ -52,6 +54,8 @@ private:
 
     IplImage* infrared;
     IplImage* depth;
+
+    PhysicalLightClient*    client;
 
     std::vector<double>     light1Calibration;
     std::vector<double>     light2Calibration;
