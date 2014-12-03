@@ -10,12 +10,15 @@ I = I_ir(ss(1,2) : ss(2,2), ss(1,1) : ss(2,1));
 %get rid of noise (S&P)
 I = medfilt2(I);
 
-optm = optimalAxis(I, template);
-template = imrotate(template, optm);
+% optm_angle = optimalAxis(I, template);
+% disp(optm_angle);
+optm_angle = 0;
+template = imrotate(template, optm_angle);
 c = conv2(double(I), template);
-% figure, imagesc(c);
+c = nonMaxSupr(c);
+figure, imagesc(c);
 
-peaks = c > (max(max(c))/3); %threshold;
+peaks = c > (max(max(c))/5); %threshold;
 % peaks = bwmorph(peaks, 'skel', 10);
 % peaks = bwmorph(peaks, 'spur');
 % [x,y] = find(peaks == 1);
@@ -42,14 +45,15 @@ peaks = c > (max(max(c))/3); %threshold;
 % x = [x1, x2];
 % y = [y1, y2];
 
-stats = regionprops(peaks, 'Centroid');
+stats = regionprops(peaks, 'Centroid', 'Extrema');
 c1 = stats(1).Centroid;
 c2 = stats(2).Centroid;
 centroids = [c1; c2];
 centroids(:,1) = centroids(:,1) + ss(1,1) - size(template,2)/2;
 centroids(:,2) = centroids(:,2) + ss(1,2) - size(template,1)/2;
+% stats(1).Extrema(1,:)
 
-subplot(1,2,1), imshow(I_ir);
+figure, subplot(1,2,1), imshow(I_ir);
 hold on, plot(centroids(1,1), centroids(1,2), 'x', 'MarkerSize', 10);
 plot(centroids(2,1), centroids(2,2), 'x', 'MarkerSize', 10);
 hold off, subplot(1,2,2), imshow(peaks);
