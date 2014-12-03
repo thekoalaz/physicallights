@@ -8,7 +8,6 @@
 
 #include "resource.h"
 #include "NuiApi.h"
-#include "ImageRenderer.h"
 
 #include <vector>
 
@@ -66,7 +65,6 @@ private:
     INuiSensor*             m_pNuiSensor;
 
     // Direct2D
-    ImageRenderer*          m_pDrawColor;
     ID2D1Factory*           m_pD2DFactory;
     
     HANDLE                  m_pColorStreamHandle;

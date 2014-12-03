@@ -23,7 +23,6 @@
 /// </summary>
 CInfraredBasics::CInfraredBasics() :
     m_pD2DFactory(NULL),
-    m_pDrawColor(NULL),
     m_hNextColorFrameEvent(INVALID_HANDLE_VALUE),
     m_pColorStreamHandle(INVALID_HANDLE_VALUE),
     m_pNuiSensor(NULL),
@@ -54,16 +53,12 @@ CInfraredBasics::~CInfraredBasics()
         CloseHandle(m_hNextDepthFrameEvent);
     }
 
-    // clean up Direct2D renderer
-    delete m_pDrawColor;
-    m_pDrawColor = NULL;
 
     delete [] m_pTempColorBuffer;
     m_pTempColorBuffer = NULL;
 
     // clean up Direct2D
     SafeRelease(m_pD2DFactory);
-
     SafeRelease(m_pNuiSensor);
 }
 
@@ -204,8 +199,6 @@ LRESULT CALLBACK CInfraredBasics::DlgProc(HWND hWnd, UINT message, WPARAM wParam
 
             // Create and initialize a new Direct2D image renderer (take a look at ImageRenderer.h)
             // We'll use this to draw the data we receive from the Kinect to the screen
-            m_pDrawColor = new ImageRenderer();
-            HRESULT hr = m_pDrawColor->Initialize(GetDlgItem(m_hWnd, IDC_VIDEOVIEW), m_pD2DFactory, cColorWidth, cColorHeight, cColorWidth * sizeof(long));
             if (FAILED(hr))
             {
                 SetStatusMessage(L"Failed to initialize the Direct2D draw device.");
@@ -299,7 +292,7 @@ HRESULT CInfraredBasics::CreateFirstConnected()
     {
         // Initialize the Kinect and specify that we'll be using color
         //hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_COLOR); 
-        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX|NUI_INITIALIZE_FLAG_USES_COLOR); 
+        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH|NUI_INITIALIZE_FLAG_USES_COLOR); 
         if (SUCCEEDED(hr))
         {
             // Create an event that will be signaled when color data is available
@@ -479,7 +472,6 @@ void CInfraredBasics::ProcessColor()
         }
 
         // Draw the data with Direct2D
-        m_pDrawColor->Draw(reinterpret_cast<BYTE*>(m_pTempColorBuffer), cColorWidth * cColorHeight * sizeof(RGBQUAD));
 
         // If the user pressed the screenshot button, save a screenshot
         if (m_bSaveScreenshot)
@@ -495,18 +487,30 @@ void CInfraredBasics::ProcessColor()
             compression_params.push_back(9);
 
             const NUI_IMAGE_FRAME * pImageFrame = NULL;
-            HRESULT hr = NuiImageStreamGetNextFrame( m_hNextDepthFrameEvent, 0, &pImageFrame );
-            INuiFrameTexture * pTexture = pImageFrame->pFrameTexture;
-            NUI_LOCKED_RECT LockedRect;
-            pTexture->LockRect( 0, &LockedRect, NULL, 0 );
+            //HRESULT hr = NuiImageStreamGetNextFrame( m_hNextDepthFrameEvent, 0, &pImageFrame );
+            //INuiFrameTexture * pTexture = pImageFrame->pFrameTexture;
+            //NUI_LOCKED_RECT LockedRect;
+            //pTexture->LockRect( 0, &LockedRect, NULL, 0 );
 
-            cv::Mat depth = cvCreateImageHeader(cvSize(cColorWidth,cColorHeight),IPL_DEPTH_8U, 3);
-            cvSetData(&depth,static_cast<BYTE *>(LockedRect.pBits),cColorWidth*3);
-            //cv::Mat img(cColorHeight, cColorWidth, CV_8UC4, static_cast<BYTE *>(LockedRect.pBits));
-            cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-            cv::imshow( "Display window", depth );                   // Show our image inside it.
+            cv::Mat img;
+            img.create(cColorHeight, cColorWidth, CV_8UC3);
+            //cvSetData(&img, static_cast<BYTE *>(LockedRect.pBits), cColorWidth);
+            for (int i=0; i<img.rows; i++)
+            {  
+                uchar *ptr = img.ptr<uchar>(i);
+                  
+                //?uchar  
+                uchar *pBuffer = (uchar*)(LockedRect.pBits) + i * LockedRect.Pitch;
+                for (int j=0; j<img.cols; j++)
+                {
+                    ptr[3*j] = pBuffer[4*j];
+                    ptr[3*j+1] = pBuffer[4*j+1];
+                    ptr[3*j+2] = pBuffer[4*j+2];
+                }
+            }
+            img = cv::imread("C:\Users\Kevin\OneDrive\Pictures\Private\Cocktail_Party_Resize.png");
             //cvSetData(img, static_cast<BYTE *>(LockedRect.pBits), img->widthStep);
-            cv::imwrite("Calibrate_Infrared.png", depth, compression_params);
+            cv::imwrite("Calibrate_Infrared.bmp", img);
             //// Write out the bitmap to disk
             //hr = SaveBitmapToFile(static_cast<BYTE *>(LockedRect.pBits), cColorWidth, cColorHeight, 32, screenshotPath);
 
@@ -614,4 +618,3 @@ void CInfraredBasics::Stop()
 {
     SetStatusMessage(L"Stop");
 }
-

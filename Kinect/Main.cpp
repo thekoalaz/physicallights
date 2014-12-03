@@ -7,41 +7,42 @@
 #include <cmath>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <opencv2/opencv.hpp>
 
 #include "PhysicalLightClient.h"
 #include "PhysicalLightKinect.h"
 
 void circle(double & x, double & z, const double radius, const double angle)
 {
-	x = radius * cos(angle);
-	z = radius * sin(angle);
+    x = radius * cos(angle);
+    z = radius * sin(angle);
 
-	return;
+    return;
 }
 
 void tester(PhysicalLightClient * client)
 {
-	double angle = 0;
-	double radius = 300;
-	int step = 100;
-	double angle_increment = M_PI * 2 / step;
-	double x, z;
-	int id = 0;
-	while (true)
-	{
-		while (true) {
-			if (angle > M_PI * 2)
-			{
-				angle = 0;
-				break;
-			}
-			angle += angle_increment;
-			circle(x, z, radius, angle);
-			client->translate(id, x, 180, z);
-		}
-		id = (id == 0) ? 1 : 0;
-		Sleep(50);
-	}
+    double angle = 0;
+    double radius = 300;
+    int step = 100;
+    double angle_increment = M_PI * 2 / step;
+    double x, z;
+    int id = 0;
+    while (true)
+    {
+        while (true) {
+            if (angle > M_PI * 2)
+            {
+                angle = 0;
+                break;
+            }
+            angle += angle_increment;
+            circle(x, z, radius, angle);
+            client->translate(id, x, 180, z);
+        }
+        id = (id == 0) ? 1 : 0;
+        Sleep(50);
+    }
 
 }
 using namespace std;
@@ -56,11 +57,23 @@ using namespace std;
 /// <returns>status</returns>
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	PhysicalLightClient * client = PhysicalLightClient::Instance();
-    CInfraredBasics application;
-    application.Run(hInstance, nCmdShow);
-	// Testing Maya
-	//tester(client);
-	//cout << "Press any key to exit";
-	std::getchar();
+    PhysicalLightClient * client = PhysicalLightClient::Instance();
+    cv::Mat img;
+    try
+    {
+        img = cv::imread("C:\\Users\\Kevin\\OneDrive\\Pictures\\Private\\Cocktail_Party_Resize.png", 1);
+    }
+    catch(std::exception e) 
+    {
+        printf("Exception: [%s]\\n", e.what());
+    }
+    cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE );// Create a window for display.
+    cv::imshow( "Display window", img );                   // Show our image inside it.
+    //cv::imwrite("Calibrate_Infrared.bmp", img);
+    //CInfraredBasics application;
+    //application.Run(hInstance, nCmdShow);
+    // Testing Maya
+    //tester(client);
+    //cout << "Press any key to exit";
+    std::getchar();
 }
