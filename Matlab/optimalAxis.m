@@ -1,5 +1,5 @@
-function optm = optimalAxis(im, template)
-%For now assuming 2 detected objects
+function optm_angle = optimalAxis(im, template)
+%Assuming 2 detected objects
 proportion = zeros(20,2);
 
 i = 1;
@@ -16,13 +16,13 @@ end
 
 temp = max(proportion(:,2));
 [idx_m, idx_n] = find(proportion == temp);
-optm = proportion(idx_m, 1);
+optm_angle = proportion(idx_m, 1);
 
 %deal with multiple possibilities
-if(size(optm,1) > 1)
+if(size(optm_angle,1) > 1)
     if(proportion(idx_m(1) - 1, 2) > proportion(idx_m(end) + 1, 2))
-        optm = proportion(idx_m(1), 1);
+        optm_angle = proportion(idx_m(1), 1);
     else
-        optm = proportion(idx_m(end), 1);
+        optm_angle = proportion(idx_m(end), 1);
     end
 end
