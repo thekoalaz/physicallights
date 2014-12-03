@@ -19,4 +19,4 @@ start([vid1, vid2]);
 
 im_ir = getsnapshot(vid1); 
 im_depth = getsnapshot(vid2);
-    
+calibrate(im_ir, im_depth);
