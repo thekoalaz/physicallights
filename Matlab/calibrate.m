@@ -1,5 +1,5 @@
-% function calibrate()
-% [im, im_depth] = kinectframe();
+function calibrate()
+[im, im_depth] = kinectframe();
 
 %get search space window and write to .mat file
 figure, imshow(im);
