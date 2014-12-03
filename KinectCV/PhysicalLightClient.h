@@ -16,7 +16,7 @@ private:
 	~PhysicalLightClient();
 	int	connect();
 	int	disconnect();
-	int	send_command(std::string command);
+	int	send_setAttrCommand(std::string setAttrCommand);
 
 public:
     static const int KEY_LIGHT;
@@ -34,7 +34,8 @@ private:
 
 	static PhysicalLightClient* instance;
 	std::string	server_name = "mayaCommand";
-	static const std::string command;
+	static const std::string setAttrCommand;
+	static const std::string getAttrCommand;
 	static const  std::string lights_namespace;
 
 	typedef std::map<int, std::string> LightMap;

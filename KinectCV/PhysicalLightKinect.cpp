@@ -129,8 +129,8 @@ int PhysicalLightKinect::Run()
 
                 m_firstCalibration = false;
             }
-            client->AimAtCenter(PhysicalLightClient::KEY_LIGHT);
-            client->AimAtCenter(PhysicalLightClient::FILL_LIGHT);
+            //client->AimAtCenter(PhysicalLightClient::KEY_LIGHT);
+            //client->AimAtCenter(PhysicalLightClient::FILL_LIGHT);
         }
     }
 
@@ -265,11 +265,12 @@ void PhysicalLightKinect::Calibrate()
     std::cout << "Calibrate";
     if (m_firstCalibration)
     {
-        system("matlab -r calibrate('', '') -logfile calibrate.log -nosplash -nodesktop");
+        system("matlab -r calibrate() -logfile calibrate.log -nosplash -nodesktop");
+        Sleep(30000);
     }
     else
     {
-        system("matlab -r updateCoordinates('', '') -logfile calibrate.log -nosplash -nodesktop -minimize");
+        system("matlab -r updateCoordinates() -logfile calibrate.log -nosplash -nodesktop -minimize");
     }
     Sleep(2000);
     Parse_Calibrate();
@@ -295,7 +296,7 @@ void PhysicalLightKinect::Calibrate()
 
 void PhysicalLightKinect::Parse_Calibrate()
 {
-    std::string fileName = "calibrate.txt";
+    std::string fileName = ".\\data\\calibrate.txt";
     std::ifstream fin(fileName);
     if( !fin  ) {
         std::cerr << "Can't open file " << fileName << std::endl;
