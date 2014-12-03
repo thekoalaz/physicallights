@@ -113,26 +113,6 @@ int PhysicalLightKinect::Run()
     cvReleaseImageHeader(&depth);
     NuiShutdown();
     return 0;
-
-
-
-    //cv::Mat image;
-    ////image = cv::imread(".\\lena512.bmp"); // Read the file
-    //image = cv::imread(".\\physical_model.jpg"); // Read the file
-
-    //if(! image.data ) // Check for invalid input
-    //{
-    //    std::cout << "Could not open or find the image" << std::endl;
-    //    return -1;
-    //}
-
-    //cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE ); // Create a window for display.
-    //cv::imshow( "Display window", image ); // Show our image inside it.
-
-    //cv::waitKey(0); // Wait for a keystroke in the window
-    //std::cout << "Press any key to exit";
-    //std::getchar();
-    //return 0;
 }
 
 void PhysicalLightKinect::Update()
@@ -273,7 +253,6 @@ void PhysicalLightKinect::Calibrate()
     result << ") ";
 
     std::cout << result.str();
-
 }
 
 void PhysicalLightKinect::Parse_Calibrate()
