@@ -16,7 +16,11 @@ private:
 	int	send_command(std::string command);
 
 public:
-
+    static const int KEY_LIGHT;
+    static const int FILL_LIGHT;
+    static const int CHAR;
+    static const int GROUND;
+    static const int CAMERA;
 
 private:
 	int connection;

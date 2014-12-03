@@ -4,6 +4,10 @@
 #include <string>
 #include <strsafe.h>
 
+#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "PhysicalLightKinect.h"
 
 PhysicalLightKinect::PhysicalLightKinect() :
@@ -44,46 +48,45 @@ PhysicalLightKinect::~PhysicalLightKinect()
 int PhysicalLightKinect::Run()
 {
     INuiSensor * pNuiSensor;
-    HRESULT hr;
+    HRESULT hr = S_OK;
 
     infrared = cvCreateImageHeader(cvSize(ImageWidth, ImageHeight),IPL_DEPTH_8U,1);
     depth = cvCreateImageHeader(cvSize(ImageWidth, ImageHeight),IPL_DEPTH_8U,1);
 
-    hr = NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX | NUI_INITIALIZE_FLAG_USES_COLOR);
-    if (hr != S_OK)
-    {
-        std::cout << "NuiInitialize failed" << std::endl;
-        return hr;
-    }
+    //hr = NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX | NUI_INITIALIZE_FLAG_USES_COLOR);
+    //if (hr != S_OK)
+    //{
+    //    std::cout << "NuiInitialize failed" << std::endl;
+    //    return hr;
+    //}
 
-    m_hNextColorFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-    hr = NuiImageStreamOpen(
-        NUI_IMAGE_TYPE_COLOR_INFRARED,
-        NUI_IMAGE_RESOLUTION_640x480,
-        0,
-        2,
-        m_hNextColorFrameEvent,
-        &m_pColorStreamHandle);
-    if (FAILED(hr))
-    {
-        std::cout << "Could not open infrared stream video" << std::endl;
-        return hr;
-    }
+    //m_hNextColorFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    //hr = NuiImageStreamOpen(
+    //    NUI_IMAGE_TYPE_COLOR_INFRARED,
+    //    NUI_IMAGE_RESOLUTION_640x480,
+    //    0,
+    //    2,
+    //    m_hNextColorFrameEvent,
+    //    &m_pColorStreamHandle);
+    //if (FAILED(hr))
+    //{
+    //    std::cout << "Could not open infrared stream video" << std::endl;
+    //    return hr;
+    ////}
 
-    m_hNextDepthFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-    hr = NuiImageStreamOpen(
-        NUI_IMAGE_TYPE_DEPTH_AND_PLAYER_INDEX,
-        NUI_IMAGE_RESOLUTION_640x480,
-        0,
-        2,
-        m_hNextDepthFrameEvent,
-        &m_pDepthStreamHandle);
-    if (FAILED(hr))
-    {
-        std::cout << "Could not open depth stream video" << std::endl;
-        return hr;
-    }
-
+    ////m_hNextDepthFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    ////hr = NuiImageStreamOpen(
+    ////    NUI_IMAGE_TYPE_DEPTH_AND_PLAYER_INDEX,
+    ////    NUI_IMAGE_RESOLUTION_640x480,
+    ////    0,
+    ////    2,
+    ////    m_hNextDepthFrameEvent,
+    ////    &m_pDepthStreamHandle);
+    ////if (FAILED(hr))
+    ////{
+    ////    std::cout << "Could not open depth stream video" << std::endl;
+    //    return hr;
+    //}
 
     while (1)
     {
@@ -100,6 +103,27 @@ int PhysicalLightKinect::Run()
         if (c == 'c')
         {
             Calibrate();
+            Transform(light1Calibration);
+            Transform(light2Calibration);
+            client->translate(PhysicalLightClient::KEY_LIGHT, light1Calibration[0], light1Calibration[1], light1Calibration[2]);
+            client->translate(PhysicalLightClient::FILL_LIGHT, light2Calibration[0], light2Calibration[1], light2Calibration[2]);
+            if (m_firstCalibration)
+            {
+                client->translate(PhysicalLightClient::CHAR,
+                    light1Calibration[0] + light2Calibration[0] / 2,
+                    light1Calibration[1] + light2Calibration[1] / 2+750,
+                    light1Calibration[2] + light2Calibration[2] / 2);
+                client->translate(PhysicalLightClient::GROUND,
+                    light1Calibration[0] + light2Calibration[0] / 2,
+                    light1Calibration[1] + light2Calibration[1] / 2,
+                    light1Calibration[2] + light2Calibration[2] / 2);
+                client->translate(PhysicalLightClient::CAMERA,
+                    light1Calibration[0] + light2Calibration[0] / 2-500,
+                    light1Calibration[1] + light2Calibration[1] / 2+300,
+                    light1Calibration[2] + light2Calibration[2] / 2+200);
+
+                m_firstCalibration = false;
+            }
         }
     }
 
@@ -232,7 +256,14 @@ int PhysicalLightKinect::drawDepth()
 void PhysicalLightKinect::Calibrate()
 {
     std::cout << "Calibrate";
-    system("matlab -r calibrate('', '') -logfile calibrate.log -nosplash -nodesktop -minimize");
+    if (m_firstCalibration)
+    {
+        system("matlab -r calibrate_first('', '') -logfile calibrate.log -nosplash -nodesktop");
+    }
+    else
+    {
+        system("matlab -r calibrate('', '') -logfile calibrate.log -nosplash -nodesktop -minimize");
+    }
     Sleep(2000);
     Parse_Calibrate();
 
@@ -284,10 +315,16 @@ void PhysicalLightKinect::Parse_Calibrate()
     }
 
     fin.close();
-
-    client->translate
 }
 
+void PhysicalLightKinect::Transform(std::vector<double> & coords)
+{
+    double focal_x = (double)ImageWidth / (2 * tan(X_FOV * M_PI / 180.0));
+    double focal_y = (double)ImageHeight / (2 * tan(Y_FOV * M_PI / 180.0));
+
+    coords[0] = coords[2] * coords[0] / focal_x;
+    coords[1] = coords[2] * coords[1] / focal_y;
+}
 
 void PhysicalLightKinect::Start()
 {
@@ -298,4 +335,3 @@ void PhysicalLightKinect::Stop()
 {
     std::cout << "Stop";
 }
-

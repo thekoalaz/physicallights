@@ -21,6 +21,9 @@ class PhysicalLightKinect
     static const int        ImageWidth  = 640;
     static const int        ImageHeight = 480;
 
+    static const int        X_FOV = 57;
+    static const int        Y_FOV = 43;
+
 public:
     /// <summary>
     /// Constructor
@@ -40,6 +43,8 @@ private:
 
     bool                    m_bSaveInfrared;
     bool                    m_bSaveDepth;
+
+    bool                    m_firstCalibration;
 
     // Current Kinect
     INuiSensor*             m_pNuiSensor;
@@ -65,9 +70,10 @@ private:
     void                    Parse_Calibrate();
     void                    Parse_Line(std::string line, std::vector<double> & calibrate);
 
+    void                    Transform(std::vector<double> & coords);
+
     void                    Start();
     void                    Stop();
-
 
     int                     drawInfrared();
     int                     drawDepth();
