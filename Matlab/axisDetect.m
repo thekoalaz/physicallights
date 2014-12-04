@@ -1,8 +1,8 @@
 % function centroids = axisDetect(I_ir, ss)
 
 %template as a cone
-template = zeros(14,8);
-template(3:12, 2:7) = ones(10,6);
+template = zeros(30,30);
+template(11:21, 13:19) = ones(11,7);
 
 %reduce search space to window assumption
 I = I_ir(ss(1,2) : ss(2,2), ss(1,1) : ss(2,1));
