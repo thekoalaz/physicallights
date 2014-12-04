@@ -95,7 +95,7 @@ int PhysicalLightKinect::Run()
         if (calibrate)
         {
             Update();
-            Sleep(5000);
+            Sleep(8000);
         }
 
         int c = cvWaitKey(1);
@@ -153,7 +153,7 @@ void PhysicalLightKinect::Update()
             (light1Calibration[2] + light2Calibration[2]) / 2);
         client->translate(PhysicalLightClient::CAMERA,
             (light1Calibration[0] + light2Calibration[0]) / 2-250,
-            (light1Calibration[1] + light2Calibration[1]) / 2,
+            (light1Calibration[1] + light2Calibration[1]) / 2-30,
             (light1Calibration[2] + light2Calibration[2]) / 2+100);
 
         m_firstCalibration = false;
