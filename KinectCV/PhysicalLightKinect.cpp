@@ -285,7 +285,6 @@ void PhysicalLightKinect::Calibrate()
     Sleep(5000);
     Parse_Calibrate();
 
-    /* Test Result */
     std::ostringstream result;
     result << "(";
     for (auto value : light1Calibration)
