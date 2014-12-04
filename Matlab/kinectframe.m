@@ -1,7 +1,7 @@
 function [im_ir, im_depth] = kinectframe()
 
 %Create objects
-vid1 = videoinput('kinect', 1, 'RGB_640x480');
+vid1 = videoinput('kinect', 1, 'Infrared_640x480');
 vid2 = videoinput('kinect', 2, 'Depth_640x480');
 
 vid1.FrameGrabInterval = 1;
