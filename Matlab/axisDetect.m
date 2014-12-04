@@ -40,8 +40,8 @@ centroids = [pos1; pos2];
 centroids(:,1) = centroids(:,1) + ss(1,1) - size(template,2)/2;
 centroids(:,2) = centroids(:,2) + ss(1,2) - size(template,1)/2;
 
-figure, subplot(1,2,1), imshow(I_ir);
-hold on, plot(centroids(1,1), centroids(1,2), 'x', 'MarkerSize', 10);
-plot(centroids(2,1), centroids(2,2), 'x', 'MarkerSize', 10);
-hold off, subplot(1,2,2), imshow(peaks);
-pause(.005);
+% figure, subplot(1,2,1), imshow(I_ir);
+% hold on, plot(centroids(1,1), centroids(1,2), 'x', 'MarkerSize', 10);
+% plot(centroids(2,1), centroids(2,2), 'x', 'MarkerSize', 10);
+% hold off, subplot(1,2,2), imshow(peaks);
+% pause(.005);
