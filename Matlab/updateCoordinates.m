@@ -10,3 +10,4 @@ centroids = axisDetect(im, search_space);
 centroids(:,3) = getDepth(im_depth, centroids);
 
 writeCoord(centroids);
+exit;
