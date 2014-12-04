@@ -1,4 +1,4 @@
-% function centroids = axisDetect(I_ir, ss)
+function centroids = axisDetect(I_ir, ss)
 
 %template as a cone
 template = zeros(30,30);

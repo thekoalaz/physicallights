@@ -95,6 +95,7 @@ int PhysicalLightKinect::Run()
         if (calibrate)
         {
             Update();
+            Sleep(5000);
         }
 
         int c = cvWaitKey(1);
@@ -271,17 +272,17 @@ int PhysicalLightKinect::drawDepth()
 
 void PhysicalLightKinect::Calibrate()
 {
-    std::cout << "Calibrate";
+    std::cout << "Calibrate" << std::endl;
     if (m_firstCalibration)
     {
-        system("matlab -r calibrate() -logfile calibrate.log -nosplash -nodesktop");
-        Sleep(30000);
+        system("START /WAIT matlab -r calibrate() -logfile calibrate.log -nosplash -nodesktop");
+        Sleep(20000);
     }
     else
     {
-        system("matlab -r updateCoordinates() -logfile calibrate.log -nosplash -nodesktop -minimize");
+        system("START /WAIT matlab -r updateCoordinates() -logfile calibrate.log -nosplash -nodesktop -minimize");
     }
-    Sleep(2000);
+    Sleep(5000);
     Parse_Calibrate();
 
     /* Test Result */
@@ -300,7 +301,7 @@ void PhysicalLightKinect::Calibrate()
     }
     result << ") ";
 
-    std::cout << result.str();
+    std::cout << result.str() << std::endl;
 }
 
 void PhysicalLightKinect::Parse_Calibrate()
@@ -322,12 +323,19 @@ void PhysicalLightKinect::Parse_Calibrate()
     {
         if (index < divide)
         {
-            light1Calibration.push_back(line);
+            if (m_firstCalibration)
+                light1Calibration.push_back(line);
+            else
+                light1Calibration[index] = line;
             index++;
         }
         else
         {
-            light2Calibration.push_back(line);
+            if (m_firstCalibration)
+                light2Calibration.push_back(line);
+            else
+                light2Calibration[index-divide] = line;
+            index++;
         }
     }
 
