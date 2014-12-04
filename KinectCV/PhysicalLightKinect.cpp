@@ -89,49 +89,32 @@ int PhysicalLightKinect::Run()
     //}
 
     cv::namedWindow("Command Window", CV_WINDOW_AUTOSIZE);
+    bool calibrate = false;
     while (1)
     {
-        //Update();
-        //exit
+        if (calibrate)
+        {
+            Update();
+        }
+
         int c = cvWaitKey(1);
-        if (c == 27 || c == 'q' || c == 'Q')
-            break;
         if (c == 's')
         {
             m_bSaveInfrared = true;
             m_bSaveDepth = true;
         }
+        if (c == 'C')
+        {
+            if (calibrate) calibrate = false;
+            else calibrate = true;
+        }
         if (c == 'c')
         {
-            Calibrate();
-            Transform(light1Calibration);
-            Transform(light2Calibration);
-            client->translate(PhysicalLightClient::KEY_LIGHT, light1Calibration[0], light1Calibration[1], light1Calibration[2]);
-            client->translate(PhysicalLightClient::FILL_LIGHT, light2Calibration[0], light2Calibration[1], light2Calibration[2]);
-            if (m_firstCalibration)
-            {
-                client->set_center(
-                    (light1Calibration[0] + light2Calibration[0]) / 2,
-                    (light1Calibration[1] + light2Calibration[1]) / 2,
-                    (light1Calibration[2] + light2Calibration[2]) / 2);
-                client->translate(PhysicalLightClient::CHAR,
-                    (light1Calibration[0] + light2Calibration[0]) / 2,
-                    (light1Calibration[1] + light2Calibration[1]) / 2 + 600,
-                    (light1Calibration[2] + light2Calibration[2]) / 2);
-                client->translate(PhysicalLightClient::GROUND,
-                    (light1Calibration[0] + light2Calibration[0]) / 2,
-                    (light1Calibration[1] + light2Calibration[1]) / 2-170,
-                    (light1Calibration[2] + light2Calibration[2]) / 2);
-                client->translate(PhysicalLightClient::CAMERA,
-                    (light1Calibration[0] + light2Calibration[0]) / 2-250,
-                    (light1Calibration[1] + light2Calibration[1]) / 2,
-                    (light1Calibration[2] + light2Calibration[2]) / 2+100);
-
-                m_firstCalibration = false;
-            }
-            //client->AimAtCenter(PhysicalLightClient::KEY_LIGHT);
-            //client->AimAtCenter(PhysicalLightClient::FILL_LIGHT);
+            Update();
         }
+        //exit
+        if (c == 27 || c == 'q' || c == 'Q')
+            break;
     }
 
     if (NULL == m_pNuiSensor || FAILED(hr))
@@ -148,18 +131,44 @@ int PhysicalLightKinect::Run()
 
 void PhysicalLightKinect::Update()
 {
-    //std::cout<<"Wait for Infrared"<<std::endl;
-    if ( WAIT_OBJECT_0 == WaitForSingleObject(m_hNextColorFrameEvent, 0))
+    Calibrate();
+    Transform(light1Calibration);
+    Transform(light2Calibration);
+    client->translate(PhysicalLightClient::KEY_LIGHT, light1Calibration[0], light1Calibration[1], light1Calibration[2]);
+    client->translate(PhysicalLightClient::FILL_LIGHT, light2Calibration[0], light2Calibration[1], light2Calibration[2]);
+    if (m_firstCalibration)
     {
-    //    std::cout << "Draw Infrared" << std::endl;
-        drawInfrared();
+        client->set_center(
+            (light1Calibration[0] + light2Calibration[0]) / 2,
+            (light1Calibration[1] + light2Calibration[1]) / 2,
+            (light1Calibration[2] + light2Calibration[2]) / 2);
+        client->translate(PhysicalLightClient::CHAR,
+            (light1Calibration[0] + light2Calibration[0]) / 2,
+            (light1Calibration[1] + light2Calibration[1]) / 2 + 600,
+            (light1Calibration[2] + light2Calibration[2]) / 2);
+        client->translate(PhysicalLightClient::GROUND,
+            (light1Calibration[0] + light2Calibration[0]) / 2,
+            (light1Calibration[1] + light2Calibration[1]) / 2-170,
+            (light1Calibration[2] + light2Calibration[2]) / 2);
+        client->translate(PhysicalLightClient::CAMERA,
+            (light1Calibration[0] + light2Calibration[0]) / 2-250,
+            (light1Calibration[1] + light2Calibration[1]) / 2,
+            (light1Calibration[2] + light2Calibration[2]) / 2+100);
+
+        m_firstCalibration = false;
     }
-    //std::cout<<"Wait for Depth"<<std::endl;
-    if ( WAIT_OBJECT_0 == WaitForSingleObject(m_hNextDepthFrameEvent, 0))
-    {
-    //    std::cout << "Draw Depth" << std::endl;
-        drawDepth();
-    }
+    ////std::cout<<"Wait for Infrared"<<std::endl;
+    //if ( WAIT_OBJECT_0 == WaitForSingleObject(m_hNextColorFrameEvent, 0))
+    //{
+    ////    std::cout << "Draw Infrared" << std::endl;
+    //    drawInfrared();
+    //}
+    ////std::cout<<"Wait for Depth"<<std::endl;
+    //if ( WAIT_OBJECT_0 == WaitForSingleObject(m_hNextDepthFrameEvent, 0))
+    //{
+    ////    std::cout << "Draw Depth" << std::endl;
+    //    drawDepth();
+    //}
 }
 int PhysicalLightKinect::drawInfrared()
 {
