@@ -1,8 +1,8 @@
-function centroids = axisDetect(I_ir, ss)
+% function centroids = axisDetect(I_ir, ss)
 
 %template as a cone
-template = zeros(14,6);
-template(3:12, 3:4) = ones(10,2);
+template = zeros(14,8);
+template(3:12, 2:7) = ones(10,6);
 
 %reduce search space to window assumption
 I = I_ir(ss(1,2) : ss(2,2), ss(1,1) : ss(2,1));
@@ -16,8 +16,9 @@ optm_angle = 0;
 template = imrotate(template, optm_angle);
 c = conv2(double(I), template);
 c = removeModel(c);
+% figure, imagesc(c);
 c = nonMaxSupr(c);
-figure, imagesc(c);
+% figure, imagesc(c);
 
 peaks = c > (max(max(c))/5); %threshold;
 % peaks = bwmorph(peaks, 'skel', 10);
