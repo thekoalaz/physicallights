@@ -19,6 +19,8 @@ PhysicalLightKinect::PhysicalLightKinect() :
     m_pTempColorBuffer(NULL),
     m_bSaveInfrared(false),
     m_bSaveDepth(false),
+    m_firstCalibration(true),
+    m_reCalibrate(false),
     client(PhysicalLightClient::Instance())
 {
 }
@@ -99,6 +101,10 @@ int PhysicalLightKinect::Run()
         }
 
         int c = cvWaitKey(1);
+        if (c == 'n')
+        {
+            m_reCalibrate = true;
+        }
         if (c == 's')
         {
             m_bSaveInfrared = true;
@@ -137,7 +143,7 @@ void PhysicalLightKinect::Update()
     Transform(light2Calibration);
     client->translate(PhysicalLightClient::KEY_LIGHT, light1Calibration[0], light1Calibration[1], light1Calibration[2]);
     client->translate(PhysicalLightClient::FILL_LIGHT, light2Calibration[0], light2Calibration[1], light2Calibration[2]);
-    if (m_firstCalibration)
+    if (m_firstCalibration || m_reCalibrate)
     {
         client->set_center(
             (light1Calibration[0] + light2Calibration[0]) / 2,
@@ -157,6 +163,7 @@ void PhysicalLightKinect::Update()
             (light1Calibration[2] + light2Calibration[2]) / 2+100);
 
         m_firstCalibration = false;
+        m_reCalibrate = false;
     }
     ////std::cout<<"Wait for Infrared"<<std::endl;
     //if ( WAIT_OBJECT_0 == WaitForSingleObject(m_hNextColorFrameEvent, 0))
@@ -273,7 +280,7 @@ int PhysicalLightKinect::drawDepth()
 void PhysicalLightKinect::Calibrate()
 {
     std::cout << "Calibrate" << std::endl;
-    if (m_firstCalibration)
+    if (m_firstCalibration || m_reCalibrate)
     {
         system("START /WAIT matlab -r calibrate() -logfile calibrate.log -nosplash -nodesktop");
         Sleep(20000);

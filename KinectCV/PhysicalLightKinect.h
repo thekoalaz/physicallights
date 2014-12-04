@@ -45,6 +45,7 @@ private:
     bool                    m_bSaveDepth;
 
     bool                    m_firstCalibration;
+    bool                    m_reCalibrate;
 
     // Current Kinect
     INuiSensor*             m_pNuiSensor;
