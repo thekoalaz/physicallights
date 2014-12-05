@@ -11,7 +11,7 @@ I = I_ir(ss(1,2) : ss(2,2), ss(1,1) : ss(2,1));
 
 %get rid of noise (S&P)
 I = medfilt2(I);
-
+% figure, imshow(I);
 % optm_angle = optimalAxis(I, template);
 % disp(optm_angle);
 % optm_angle = 0;
@@ -44,4 +44,9 @@ centroids(:,2) = centroids(:,2) + ss(1,2) - size(template,1)/2;
 % hold on, plot(centroids(1,1), centroids(1,2), 'x', 'MarkerSize', 10);
 % plot(centroids(2,1), centroids(2,2), 'x', 'MarkerSize', 10);
 % hold off, subplot(1,2,2), imshow(peaks);
-% pause(.005);
+figure, imshow(I_ir);
+hold on, plot(centroids(1,1), centroids(1,2), 'x', 'MarkerSize', 10);
+plot(centroids(2,1), centroids(2,2), 'x', 'MarkerSize', 10);
+% hold off;
+pause(.1);
+% close;

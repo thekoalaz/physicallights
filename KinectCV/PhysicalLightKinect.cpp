@@ -97,7 +97,7 @@ int PhysicalLightKinect::Run()
         if (calibrate)
         {
             Update();
-            Sleep(8000);
+            Sleep(4000);
         }
 
         int c = cvWaitKey(1);
@@ -118,6 +118,7 @@ int PhysicalLightKinect::Run()
         if (c == 'c')
         {
             Update();
+            std::cout << "====================================" << std::endl;
         }
         //exit
         if (c == 27 || c == 'q' || c == 'Q')
@@ -151,15 +152,15 @@ void PhysicalLightKinect::Update()
             (light1Calibration[2] + light2Calibration[2]) / 2);
         client->translate(PhysicalLightClient::CHAR,
             (light1Calibration[0] + light2Calibration[0]) / 2,
-            (light1Calibration[1] + light2Calibration[1]) / 2 + 600,
+            (light1Calibration[1] + light2Calibration[1]) / 2 - 200,
             (light1Calibration[2] + light2Calibration[2]) / 2);
         client->translate(PhysicalLightClient::GROUND,
             (light1Calibration[0] + light2Calibration[0]) / 2,
-            (light1Calibration[1] + light2Calibration[1]) / 2-170,
+            (light1Calibration[1] + light2Calibration[1]) / 2-200,
             (light1Calibration[2] + light2Calibration[2]) / 2);
         client->translate(PhysicalLightClient::CAMERA,
             (light1Calibration[0] + light2Calibration[0]) / 2-250,
-            (light1Calibration[1] + light2Calibration[1]) / 2-30,
+            (light1Calibration[1] + light2Calibration[1]) / 2-130,
             (light1Calibration[2] + light2Calibration[2]) / 2+100);
 
         m_firstCalibration = false;
@@ -282,14 +283,15 @@ void PhysicalLightKinect::Calibrate()
     std::cout << "Calibrate" << std::endl;
     if (m_firstCalibration || m_reCalibrate)
     {
-        system("START /WAIT matlab -r calibrate() -logfile calibrate.log -nosplash -nodesktop");
-        Sleep(20000);
+        //system("START /WAIT matlab -r calibrate() -logfile calibrate.log -nosplash -nodesktop");
+        system("START /WAIT matlab -r updateCoordinates() -logfile calibrate.log -nosplash -nodesktop -minimize");
+        Sleep(15000);
     }
     else
     {
         system("START /WAIT matlab -r updateCoordinates() -logfile calibrate.log -nosplash -nodesktop -minimize");
+        Sleep(15000);
     }
-    Sleep(5000);
     Parse_Calibrate();
 
     std::ostringstream result;
@@ -308,6 +310,7 @@ void PhysicalLightKinect::Calibrate()
     result << ") ";
 
     std::cout << result.str() << std::endl;
+    Sleep(500);
 }
 
 void PhysicalLightKinect::Parse_Calibrate()
@@ -332,6 +335,8 @@ void PhysicalLightKinect::Parse_Calibrate()
             if (m_firstCalibration)
                 light1Calibration.push_back(line);
             else
+                if (index == divide - 1)
+                    line = line * cos(27 * M_PI / 180);
                 light1Calibration[index] = line;
             index++;
         }
@@ -340,6 +345,8 @@ void PhysicalLightKinect::Parse_Calibrate()
             if (m_firstCalibration)
                 light2Calibration.push_back(line);
             else
+                if (index == divide*2 - 1)
+                    line = line * cos(27 * M_PI / 180);
                 light2Calibration[index-divide] = line;
             index++;
         }
