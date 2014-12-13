@@ -159,9 +159,9 @@ void PhysicalLightKinect::Update()
             (light1Calibration[1] + light2Calibration[1]) / 2-200,
             (light1Calibration[2] + light2Calibration[2]) / 2);
         client->translate(PhysicalLightClient::CAMERA,
-            (light1Calibration[0] + light2Calibration[0]) / 2-250,
-            (light1Calibration[1] + light2Calibration[1]) / 2-130,
-            (light1Calibration[2] + light2Calibration[2]) / 2+100);
+            (light1Calibration[0] + light2Calibration[0]) / 2 + 100,
+            (light1Calibration[1] + light2Calibration[1]) / 2 - 100,
+            (light1Calibration[2] + light2Calibration[2]) / 2 + 250);
 
         m_firstCalibration = false;
         m_reCalibrate = false;
@@ -335,6 +335,8 @@ void PhysicalLightKinect::Parse_Calibrate()
             if (m_firstCalibration)
                 light1Calibration.push_back(line);
             else
+//                if (index == 0)
+//                    line = -line;
                 if (index == divide - 1)
                     line = line * cos(27 * M_PI / 180);
                 light1Calibration[index] = line;
@@ -345,6 +347,8 @@ void PhysicalLightKinect::Parse_Calibrate()
             if (m_firstCalibration)
                 light2Calibration.push_back(line);
             else
+//                if (index == divide)
+                    //line = -line;
                 if (index == divide*2 - 1)
                     line = line * cos(27 * M_PI / 180);
                 light2Calibration[index-divide] = line;

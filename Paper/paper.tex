@@ -1,0 +1,134 @@
+\documentclass{article}
+
+\usepackage{times}
+\usepackage{uist}
+
+\begin{document}
+
+% --- Copyright notice ---
+\conferenceinfo{CSE216}{December 15, 2014, San Diego, California, US}
+\CopyrightYear{2014}
+\crdata{978-1-60558-745-5/09/10}
+
+% Uncomment the following line to hide the copyright notice
+% \toappear{}
+% ------------------------
+
+\bibliographystyle{plain}
+
+\title{PhysLights: a Tangible User Interface for CG Lighting}
+
+%%
+%% Note on formatting authors at different institutions, as shown below:
+%% Change width arg (currently 7cm) to parbox commands as needed to
+%% accommodate widest lines, taking care not to overflow the 17.8cm line width.
+%% Add or delete parboxes for additional authors at different institutions. 
+%% If additional authors won't fit in one row, you can add a "\\"  at the
+%% end of a parbox's closing "}" to have the next parbox start a new row.
+%% Be sure NOT to put any blank lines between parbox commands!
+%%
+
+\author{
+\parbox[t]{9cm}{\centering
+	     {\em Kyung yul Kevin Lim}\\
+	     Department of CSE\\
+             UC San Diego\\
+           kyungyullim@ucsd.edu}
+\parbox[t]{9cm}{\centering
+	     {\em Bryan Binotti}\\
+	     Department of ECE\\
+             UC San Diego\\
+           bbinotti@gmail.com}
+}
+
+\maketitle
+
+\abstract
+We present a novel approach to CG lighting named {\em PhysLights}. {\em PhysLights} enables lighting artists to execute their vision and artistic choices in the physical space through a Tangible User Interface. This lighting is then represented in a conventional 3D package and rendered. Through {\em PhysLights} we explore the advantages and disadvantages of a Tangible User Interface in CG Lighting workflows, and the extent in which it can augment or replace traditional pipelines. {\em PhysLights} is part of our vision to make CG Animation production more approachable, more collaborative, and improve pre-existing pipelines.
+
+%TODO
+\classification{H5.2 [Information interfaces and presentation]:
+User Interfaces. - Graphical user interfaces.}
+
+%TODO
+\terms{TODO, Design, Human Factors (Your general terms must be any of the
+  following 16 designated terms: Algorithms, Management, Measurement,
+  Documentation, Performance, Design, Economics, Reliability,
+  Experimentation, Security, Human Factors, Standardization,
+  Languages, Theory, Legal Aspects, Verification. See ~\cite{ACMTerms} for more details.)}
+
+%TODO
+\keywords{TODO, Guides, instructions, formatting.}
+
+\tolerance=400 
+  % makes some lines with lots of white space, but 	
+  % tends to prevent words from sticking out in the margin
+
+\section{INTRODUCTION}
+TODO
+
+\section{PHYSLIGHTS}
+The system was built with a Microsoft Kinect camera that tracked the movements of light, a updateCoordinates, a MATLAB program running a detection algorithm, KinectToMaya, a C++ program that relays that movement information to Autodesk Maya, a commonly used 3D package, and finally the Solid Angle Arnold renderer to obtain the image.
+
+\subsection{Vision Detection}
+TODO
+
+\subsection{Virtual Representation}
+A C++ client program recieves the Vision Detection information and transforms the Kinect's coordinate system to a system we can use in Autodesk Maya. It then connects and sends transformation commands for each light to a Maya command server. This acts on the virtual representation inside Maya by moving the lights. Finally, through Maya's Interactive Photorealistic Rendering feature, this signals Solid Angle Arnold to re-render the scene. Autodesk Maya was chosen for it's widespread use in the industry, and Solid Angle's Arnold was used due to it's fast interactive render times.
+
+\section{METHOD}
+TODO
+
+\section{RESULT}
+We present our measurements and interview reponses.
+
+\subsection{Time}
+TODO
+
+\subsection{Advantages}
+Artists unanimously enjoyed the instant feedback from {\em PhysLights}, and the ability to quickly iterate without any wait time. A Lighting Technical Director pointed to the fact that there are significantly less steps involved compared to working in a conventional 3D pakcage. Two artists described the system in words that evoke physical concepts such as ``gravity'' and ``space.''
+
+All this points to the fact that the system successfully reduced the cognitive distance between the artist and the rendered image. These features make {\em PhysLights} ``Artist-Friendly,'' as described by a tester.
+
+\subsection{Disadvantages}
+Another unanimious opinion was that fine tuning the lighting condition to the extent that a 3D package can do will be challenging, or even impossible in some instances. For example, 3D packages allow artists to use ``light-linking''. This is a feature that makes lights only illuminate specified objects, and nothing else, a physically impossible task. Also the current system's lack of tracking camera position, and characters sometimes caused dissonance between the user's mental model and the CG render as the camera was not represented physically, and moving the physical character did not move it in the virtual scene. Two users raised concerns that in virtual lighting, they could simply add more lights but in {\em PhysLights} they would need to have these lights on hand.
+
+These limitations are discussed further in the Future Features section and Discussion section.
+
+\subsection{Future Features}
+The first feature that all testers requested was the ability to capture the qualities of light, such as exposure, color, cone angle.
+The two lead lighters made a related feature request to be able to add more tools from a set lighter's arsenal such as bounce cards, blocker cards, or soft boxes.
+
+\subsection{Education}
+TODO
+
+\section{CONCLUSION}
+TODO
+
+\section{ACKNOWLEDGMENTS}
+TODO
+
+%%%	You can use bibtex if you like, but I've hardwired in these 
+%%%	references to avoid sending you a separate .bib file.
+\begin{thebibliography}{9}
+
+\bibitem{ACMTerms} How to Classify Works Using ACMÕs Computing
+Classification System. {http://www.acm.org/class/how\_to\_use.html}.
+
+\bibitem{badenov91}  Badenov, B. Effects of prolonged use of WIMP user
+interfaces on Alces americana and Glaucomys volans.
+In {\em Proceedings of UIST '87}
+(February 30--April 1, Graceland, TN), ACM, NY, 1987, pp. 231--240.
+
+\bibitem{henry-etal92} Henry, T.R., Yeatts, A.K., Hudson, S.E., Myers, B.A.,
+and Feiner, S.K.  A nose gesture interface device: Extending virtual realities.
+{\em Presence 1}, 2 (Spring 1992), 258--261.
+
+\bibitem{GenderNeutral} Schwartz, M. Guidelines for Bias-Free Writing.
+Indiana University Press, Bloomington, IN, USA, 1995.
+
+\bibitem{zaranka81} Zaranka, W., Ed. {\em The Brand-X Anthology of Poetry:  A
+Parody Anthology.}  Apple-wood Books, Cambridge, MA, 1981.
+\end{thebibliography}
+
+\end{document}
